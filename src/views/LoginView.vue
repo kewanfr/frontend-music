@@ -55,8 +55,6 @@ const router = useRouter()
 const username = ref('kewanb')
 const password = ref('1234')
 const handleLogin = async () => {
-  console.log(username, username.value)
-  console.log(password, password.value)
   await store.login(username.value, password.value)
   router.push('/')
 }

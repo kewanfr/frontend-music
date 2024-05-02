@@ -8,59 +8,58 @@ export const fetchWrapper = {
 };
 
 function request(method) {
-    return async (url, body = {}) => {
-        const requestOptions = {
-            method,
-            headers: authHeader(url)
-        };
-        if (body && Object.keys(body).length > 0) {
-            requestOptions.headers['Content-Type'] = 'application/json';
-            requestOptions.body = JSON.stringify(body);
-        }
-        // if (credentials) {
-        //     requestOptions.credentials = credentials;
-        // }
-        return await fetch(url, requestOptions).then(handleResponse);
+  return (url, body = {}) => {
+    const requestOptions = {
+      method,
+      headers: authHeader(url),
+    };
+    if (body && Object.keys(body).length > 0) {
+      requestOptions.headers["Content-Type"] = "application/json";
+      requestOptions.body = JSON.stringify(body);
     }
+    // if (credentials) {
+    //     requestOptions.credentials = credentials;
+    // }
+    return fetch(url, requestOptions).then(handleResponse);
+  };
 }
 
 // helper functions
 
 function authHeader(url) {
-    // return auth header with jwt if user is logged in and request is to the api url
-    const { user } = useAuthStore();
-    const isLoggedIn = !!user?.token;
-    const isApiUrl = url.startsWith(import.meta.env.VITE_API_URL);
-    if (isLoggedIn && isApiUrl) {
-        return { Authorization: `${user.token}` };
-    } else {
-        return {};
-    }
+  // return auth header with jwt if user is logged in and request is to the api url
+  const { user } = useAuthStore();
+  const isLoggedIn = !!user?.token;
+  const isApiUrl = url.startsWith(import.meta.env.VITE_API_URL);
+  if (isLoggedIn && isApiUrl) {
+    return { Authorization: `${user.token}` };
+  } else {
+    return {};
+  }
 }
 
 function handleResponse(response) {
-    return response.text().then(text => {
+  return response.text().then((text) => {
+    // parse but don't throw on error if not json and return text
+    // var data = text;
+    // try {
+    //     data = JSON.parse(text);
+    // } catch (e) {
+    //     pass;
+    // }
+    const data = (text && JSON.parse(text)) || text;
 
-        // parse but don't throw on error if not json and return text
-        var data = text;
-        try {
-            data = JSON.parse(text);
-        } catch (e) {
-            pass;
-        }
-        // const data = text && JSON.parse(text);
-        
-        if (!response.ok) {
-            const { user, logout } = useAuthStore();
-            if ([401, 403].includes(response.status) && user) {
-                // auto logout if 401 Unauthorized or 403 Forbidden response returned from api
-                logout();
-            }
+    if (!response.ok) {
+      const { user, logout } = useAuthStore();
+      if ([401, 403].includes(response.status) && user) {
+        // auto logout if 401 Unauthorized or 403 Forbidden response returned from api
+        logout();
+      }
 
-            const error = (data && data.message) || response.statusText;
-            return Promise.reject(error);
-        }
+      const error = (data && data.message) || response.statusText;
+      return Promise.reject(error);
+    }
 
-        return data;
-    });
+    return data;
+  });
 }    
