@@ -2,6 +2,14 @@
 import { RouterLink, RouterView } from 'vue-router'
 import HeaderTitle from './components/layout/HeaderTitle.vue'
 import FooterMenu from './components/layout/FooterMenu.vue';
+import { useMusicStore } from '@/stores';
+import { onMounted } from 'vue';
+
+const musicStore = useMusicStore();
+
+onMounted(() => {
+  musicStore.connectWebSocket();
+})
 </script>
 
 <template class="dark">

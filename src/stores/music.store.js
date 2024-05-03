@@ -4,6 +4,10 @@ import { defineStore } from 'pinia'
 import { fetchWrapper } from "@/helpers";
 
 const baseUrl = `${import.meta.env.VITE_API_URL}/music`;
+const baseWebSocketUrl = import.meta.env.VITE_API_URL.replace(
+  "https://",
+  "ws://"
+).replace("http://", "ws://");
 
 export const useMusicStore = defineStore({
   id: "music",
@@ -15,6 +19,8 @@ export const useMusicStore = defineStore({
     queue: [],
     currentSong: null,
     downloading: [],
+
+    websocket: null,
   }),
   getters: {
     isLoading() {
@@ -22,6 +28,60 @@ export const useMusicStore = defineStore({
     },
   },
   actions: {
+    sendWebSocket(action, message) {
+      if (this.websocket) {
+        this.websocket.send(
+          JSON.stringify({
+            action: action,
+            message: message,
+          })
+        );
+        return true;
+      }
+      return false;
+    },
+    connectWebSocket() {
+      console.log(baseWebSocketUrl);
+      this.websocket = new WebSocket(baseWebSocketUrl);
+
+      this.websocket.onopen = () => {
+        console.log("WebSocket is connected.");
+
+        this.sendWebSocket("message", "hello");
+      };
+
+      this.websocket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        // Handle the received data
+        console.log(data);
+
+        if (data.action === "song_downloading") {
+          if (!this.downloading.includes(data.song?.spotify_id)) {
+            this.downloading.push(data.song?.spotify_id);
+          }
+        } else if (data.action === "song_downloaded") {
+          if (this.downloading.includes(data.song?.spotify_id)) {
+            this.downloading = this.downloading.filter(
+              (id) => id !== data.song?.spotify_id
+            );
+          }
+        }
+
+        if (data.queue) {
+          this.queue = data.queue;
+        }
+
+        console.log(this.queue, this.downloading);
+      };
+
+      this.websocket.onclose = () => {
+        console.log("WebSocket is closed.");
+      };
+
+      this.websocket.onerror = (error) => {
+        console.error("WebSocket encountered an error: ", error);
+      };
+    },
     async searchData(query, type = "track", limit = 20) {
       return new Promise((resolve, reject) => {
         fetchWrapper
@@ -42,8 +102,6 @@ export const useMusicStore = defineStore({
 
       this.music.tracks = (await this.searchData(query, "track", 20)).tracks;
       this.music.artists = (await this.searchData(query, "artist", 2)).artists;
-
-      console.log(this.music);
     },
     async getArtist(artist_id) {
       this.music = { loading: true };
@@ -67,17 +125,32 @@ export const useMusicStore = defineStore({
       });
     },
 
-    async downloadFromData(data) {
-      this.downloading.push(data);
+    async deleteTrack(track_id) {
       return new Promise((resolve, reject) => {
         fetchWrapper
-          .post(baseUrl + "/download", data)
+          .delete(baseUrl + "/track/" + track_id)
+          .then((result) => {
+            if (!result.error) {
+              resolve(result);
+            } else {
+              reject(result);
+            }
+          })
+          .catch((error) => reject(error));
+      });
+    },
+
+    async downloadFromData(data) {
+      // this.downloading.push(data);
+      return new Promise((resolve, reject) => {
+        fetchWrapper
+          .post(baseUrl + "/download/data", data)
           .then((track) => resolve(track))
           .catch((error) => reject(error));
       });
     },
     async downloadFromSpotifyId(spotify_id) {
-      this.downloading.push(spotify_id);
+      // this.downloading.push(spotify_id);
       // return new Promise((resolve, reject) => {
       //   fetchWrapper
       //     .post(baseUrl + "/download/spotify/" + spotify_id)
@@ -86,7 +159,13 @@ export const useMusicStore = defineStore({
       // });
     },
     async downloadTrack(track_id) {
-      this.downloadFromSpotifyId(track_id);
+      const track_data = this.music.tracks.find(
+        (track) => track.spotify_id === track_id
+      );
+
+      await this.downloadFromData(track_data);
+
+      console.log(track_data);
     },
   },
 });

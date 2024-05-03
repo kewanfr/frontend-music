@@ -4,7 +4,7 @@
     <MenuElement v-for="item in menuItems" :key="item.path" :path="item.path" :text="item.text"
       :iconElement="item.iconElement" />
 
-    <LoginButton />
+    <QueueNavButton />
 
   </div>
 </template>
@@ -20,6 +20,7 @@ import { useAuthStore } from '@/stores';
 import { defineAsyncComponent, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import LoginButton from '../buttons/LoginButton.vue';
+import QueueNavButton from '../buttons/QueueNavButton.vue';
 
 import { markRaw } from 'vue';
 
@@ -39,12 +40,12 @@ const menuItems = ref([
     path: "/lyrics",
     text: "Paroles",
     iconElement: IconMusic
-  },
-  {
-    path: "/queue",
-    text: "File d'attente",
-    iconElement: IconGallery
   }
+  // {
+  //   path: "/queue",
+  //   text: "File d'attente",
+  //   iconElement: IconGallery
+  // }
 ]);
 
 // const store = useAuthStore();

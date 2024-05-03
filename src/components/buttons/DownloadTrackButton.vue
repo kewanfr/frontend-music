@@ -1,10 +1,10 @@
 <template>
-    <button v-if="!downloading.includes(spotify_id)"
+    <LoadingIcon v-if="downloading.includes(spotify_id)" />
+    <button v-else-if="!queue.find(track => track.spotify_id === spotify_id)"
         class="text-blue-500 border border-blue-500 px-2 py-1 rounded hover:bg-blue-500 hover:text-white stroke-blue-500 hover:stroke-white"
         @click="downloadTrack">
         <DownloadIcon />
     </button>
-    <LoadingIcon v-else />
 </template>
 
 <script setup>
@@ -15,10 +15,11 @@ import LoadingIcon from '../icons/LoadingIcon.vue';
 
 const musicStore = useMusicStore();
 
-const { downloading } = storeToRefs(musicStore);
+const { downloading, queue } = storeToRefs(musicStore);
 
 const props = defineProps({
-    spotify_id: String
+    spotify_id: String,
+    downloaded: Boolean
 });
 
 const downloadTrack = () => {

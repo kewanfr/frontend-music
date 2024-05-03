@@ -1,6 +1,4 @@
 <template>
-    {{ console.log(music.tracks) }}
-
     <div class="w-full max-w-xl space-y-2 mt-4" id="results-list">
         <ArtistItem v-if="music.artists?.length > 0" v-for="artist in music.artists" :key="artist.id"
             :artist="artist" />

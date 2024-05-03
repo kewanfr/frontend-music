@@ -12,7 +12,6 @@ export const useUsersStore = defineStore({
   }),
   actions: {
     async getAll() {
-      console.log(baseUrl)
       // console.log(import.meta.env)
       // console.log(process.env)
       this.users = { loading: true };
