@@ -6,6 +6,9 @@ import { fetchWrapper } from "@/helpers";
 const baseUrl = `${import.meta.env.VITE_API_URL}/music`;
 const baseUrlPlex = `${import.meta.env.VITE_API_URL}/plex`;
 const baseWebSocketUrl = import.meta.env.VITE_WEBSOCKET_URL;
+import { socket } from "@/socket";
+
+// import { io } from "socket.io-client";
 
 export const useMusicStore = defineStore({
   id: "music",
@@ -70,55 +73,69 @@ export const useMusicStore = defineStore({
       return false;
     },
     connectWebSocket() {
-      console.log("Connecting to WebSocket..." + baseWebSocketUrl);
-      const protocols = ["https"];
-      this.websocket = new WebSocket(baseWebSocketUrl, protocols);
+      socket.on("connect", () => {
+        console.log("Connected to WebSocket.");
+        socket.emit("message", "Hello from client");
 
-      this.websocket.onopen = () => {
-        console.log("WebSocket is connected.");
+        socket.on("message", (data) => {
+          console.log(data);
+        });
+      });
 
-        this.sendWebSocket("message", "hello");
-      };
+      // socket.connect();
+      // this.websocket = io("http://localhost:3001");
+      // this.websocket.on("connect", () => {
+      //   console.log("Connected to WebSocket.");
+      //   this.sendWebSocket("message", "hello");
+      //   this.websocket.emit("message", "hello");
+      // });
+      // this.websocket.emit("message", "hello");
 
-      this.websocket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        // Handle the received data
-        console.log(data);
+      // this.websocket.on("message", (data) => {
+      //   console.log(data);
+      // });
 
-        if (data.action === "song_downloading") {
-          if (!this.downloading.includes(data.song?.spotify_id)) {
-            this.downloading.push(data.song?.spotify_id);
-          }
-        } else if (data.action === "song_downloaded") {
-          if (this.downloading.includes(data.song?.spotify_id)) {
-            this.downloading = this.downloading.filter(
-              (id) => id !== data.song?.spotify_id
-            );
-
-            this.tracks.push(data.song);
-          }
-        } else if (data.action === "song_deleted") {
-          this.tracks = this.tracks.filter(
-            (track) => track.spotify_id !== data.song?.spotify_id
-          );
-        }
-
-        if (data.tracks) {
-          this.tracks = data.tracks;
-        }
-
-        if (data.queue) {
-          this.queue = data.queue;
-        }
-      };
-
-      this.websocket.onclose = () => {
-        console.log("WebSocket is closed.");
-      };
-
-      this.websocket.onerror = (error) => {
-        console.error("WebSocket encountered an error: ", error);
-      };
+      // console.log("Connecting to WebSocket..." + baseWebSocketUrl);
+      // const protocols = ["https"];
+      // this.websocket = new WebSocket(baseWebSocketUrl, protocols);
+      // console.log(this.websocket);
+      // this.websocket.onopen = () => {
+      //   console.log("WebSocket is connected.");
+      //   this.sendWebSocket("message", "hello");
+      // };
+      // this.websocket.onmessage = (event) => {
+      //   const data = JSON.parse(event.data);
+      //   // Handle the received data
+      //   console.log(data);
+      //   if (data.action === "song_downloading") {
+      //     if (!this.downloading.includes(data.song?.spotify_id)) {
+      //       this.downloading.push(data.song?.spotify_id);
+      //     }
+      //   } else if (data.action === "song_downloaded") {
+      //     if (this.downloading.includes(data.song?.spotify_id)) {
+      //       this.downloading = this.downloading.filter(
+      //         (id) => id !== data.song?.spotify_id
+      //       );
+      //       this.tracks.push(data.song);
+      //     }
+      //   } else if (data.action === "song_deleted") {
+      //     this.tracks = this.tracks.filter(
+      //       (track) => track.spotify_id !== data.song?.spotify_id
+      //     );
+      //   }
+      //   if (data.tracks) {
+      //     this.tracks = data.tracks;
+      //   }
+      //   if (data.queue) {
+      //     this.queue = data.queue;
+      //   }
+      // };
+      // this.websocket.onclose = () => {
+      //   console.log("WebSocket is closed.");
+      // };
+      // this.websocket.onerror = (error) => {
+      //   console.error("WebSocket encountered an error: ", error);
+      // };
     },
     async searchData(query, type = "track", limit = 20) {
       return new Promise((resolve, reject) => {

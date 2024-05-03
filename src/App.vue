@@ -5,7 +5,11 @@ import FooterMenu from './components/layout/FooterMenu.vue';
 import { useMusicStore } from '@/stores';
 import { onMounted } from 'vue';
 
+// import { socket } from '@/socket';
+
 const musicStore = useMusicStore();
+
+// socket.off();
 
 onMounted(() => {
   musicStore.connectWebSocket();
