@@ -25,10 +25,8 @@ import QueueNavButton from '../buttons/QueueNavButton.vue';
 import { markRaw } from 'vue';
 
 const IconHome = markRaw(defineAsyncComponent(() => import('../icons/IconHome.vue')));
-const IconEmpty = markRaw(defineAsyncComponent(() => import('../icons/IconEmpty.vue')));
 const IconMusic = markRaw(defineAsyncComponent(() => import('../icons/IconMusic.vue')));
 const IconArchive = markRaw(defineAsyncComponent(() => import('../icons/IconArchive.vue')));
-const IconGallery = markRaw(defineAsyncComponent(() => import('../icons/IconGallery.vue')));
 
 // list of menu items
 const menuItems = ref([
