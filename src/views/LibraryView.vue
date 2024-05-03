@@ -1,0 +1,40 @@
+<template>
+    <main>
+        <div class="flex flex-col items-center space-y-4 mt-5">Sons téléchargés</div>
+        <div class="divide-y divide-muted">
+            <div class="flex flex-col items-center space-y-4 mt-5">
+
+                <div class="w-full max-w-xl space-y-2 mt-4" id="results-list">
+
+                    <TrackItem v-if="tracks?.length > 0" v-for="track in tracks" :key="track.id" :track="track" />
+                </div>
+
+                <LoadingSpin :isLoading="isLoading" />
+
+                <div id="toasts" class="fixed bottom-0 right-0 p-4 z-20">
+                </div>
+
+            </div>
+        </div>
+    </main>
+</template>
+
+<script setup>
+import LoadingSpin from '@/components/LoadingSpin.vue';
+
+import { useMusicStore } from '@/stores';
+import { storeToRefs } from 'pinia';
+import TrackItem from '@/components/music/TrackItem.vue';
+
+const musicStore = useMusicStore();
+
+const { tracks, isLoading } = storeToRefs(musicStore);
+
+setTimeout(() => {
+    console.log(tracks.length);
+    if (!tracks.length || tracks.length == 0) {
+        musicStore.sendWebSocket("tracks", "test");
+    }
+}, 800);
+
+</script>

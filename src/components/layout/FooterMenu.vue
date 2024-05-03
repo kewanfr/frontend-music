@@ -1,6 +1,6 @@
 <template>
   <div
-    class="py-2 flex  justify-between container gap-1 fixed bottom-0 left-0 right-0 bg-background max-w-xl m-auto border-top border-accent">
+    class="py-2 flex  justify-between container gap-1 fixed bottom-0 left-0 right-0 bg-background max-w-xl m-auto border-top border-accent bg-white">
     <MenuElement v-for="item in menuItems" :key="item.path" :path="item.path" :text="item.text"
       :iconElement="item.iconElement" />
 
@@ -27,6 +27,7 @@ import { markRaw } from 'vue';
 const IconHome = markRaw(defineAsyncComponent(() => import('../icons/IconHome.vue')));
 const IconEmpty = markRaw(defineAsyncComponent(() => import('../icons/IconEmpty.vue')));
 const IconMusic = markRaw(defineAsyncComponent(() => import('../icons/IconMusic.vue')));
+const IconArchive = markRaw(defineAsyncComponent(() => import('../icons/IconArchive.vue')));
 const IconGallery = markRaw(defineAsyncComponent(() => import('../icons/IconGallery.vue')));
 
 // list of menu items
@@ -40,6 +41,16 @@ const menuItems = ref([
     path: "/lyrics",
     text: "Paroles",
     iconElement: IconMusic
+  },
+  // {
+  //   path: "/queue",
+  //   text: "File d'attente",
+  //   custom: QueueNavButton
+  // },
+  {
+    path: "/library",
+    text: "Bibliothèque",
+    iconElement: IconArchive
   }
   // {
   //   path: "/queue",

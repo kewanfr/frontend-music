@@ -3,7 +3,7 @@
         <ArtistItem v-if="music.artists?.length > 0" v-for="artist in music.artists" :key="artist.id"
             :artist="artist" />
 
-        <TrackItem v-if="music.tracks?.length > 0" v-for="track in music.tracks" :key="track.id" :track="track" />
+        <TrackResultItem v-if="music.tracks?.length > 0" v-for="track in music.tracks" :key="track.id" :track="track" />
     </div>
 
 </template>
@@ -13,7 +13,7 @@ import { useMusicStore } from '@/stores';
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 import ArtistItem from './ArtistItem.vue';
-import TrackItem from './TrackItem.vue';
+import TrackResultItem from './TrackResultItem.vue';
 
 
 const musicStore = useMusicStore();

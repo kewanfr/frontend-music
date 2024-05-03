@@ -6,12 +6,12 @@
             <h3 class="font-semibold">{{ track.name }}</h3>
             <p class="text-gray-400">{{ track.artist }}</p>
         </div>
-        <DeleteTrackButton :spotify_id="track.spotify_id" />
+        <DownloadTrackButton :spotify_id="track.spotify_id" v-if="!track.downloaded" />
     </div>
 </template>
 
 <script setup>
-import DeleteTrackButton from '../buttons/DeleteTrackButton.vue';
+import DownloadTrackButton from '../buttons/DownloadTrackButton.vue';
 import CoverImage from './CoverImage.vue';
 
 const props = defineProps({

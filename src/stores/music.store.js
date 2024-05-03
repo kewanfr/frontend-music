@@ -4,6 +4,7 @@ import { defineStore } from 'pinia'
 import { fetchWrapper } from "@/helpers";
 
 const baseUrl = `${import.meta.env.VITE_API_URL}/music`;
+const baseUrlPlex = `${import.meta.env.VITE_API_URL}/plex`;
 const baseWebSocketUrl = import.meta.env.VITE_API_URL.replace(
   "https://",
   "ws://"
@@ -19,8 +20,15 @@ export const useMusicStore = defineStore({
     queue: [],
     currentSong: null,
     downloading: [],
-
+    tracks: [],
     websocket: null,
+    playing: {
+      title: "",
+      artist: "",
+      album: "",
+      thumb: "",
+    },
+    lyrics: "",
   }),
   getters: {
     isLoading() {
@@ -28,8 +36,31 @@ export const useMusicStore = defineStore({
     },
   },
   actions: {
+    async getPlaying() {
+      fetchWrapper
+        .get(baseUrlPlex + "/playing")
+        .then((playing) => (this.playing = playing))
+        .catch((error) => console.error(error));
+    },
+    async getPlayingLyrics() {
+      fetchWrapper
+        .get(baseUrlPlex + "/playing/lyrics")
+        .then(
+          (lyrics) =>
+            (this.lyrics = lyrics.lyrics
+              .replace(/\n\n/g, "<br>")
+              .replace(/\n/g, "<br>"))
+        )
+        .catch((error) => console.error(error));
+    },
     sendWebSocket(action, message) {
       if (this.websocket) {
+        console.log(
+          JSON.stringify({
+            action: action,
+            message: message,
+          })
+        );
         this.websocket.send(
           JSON.stringify({
             action: action,
@@ -38,10 +69,10 @@ export const useMusicStore = defineStore({
         );
         return true;
       }
+      console.log("Websocket not connected.");
       return false;
     },
     connectWebSocket() {
-      console.log(baseWebSocketUrl);
       this.websocket = new WebSocket(baseWebSocketUrl);
 
       this.websocket.onopen = () => {
@@ -64,14 +95,22 @@ export const useMusicStore = defineStore({
             this.downloading = this.downloading.filter(
               (id) => id !== data.song?.spotify_id
             );
+
+            this.tracks.push(data.song);
           }
+        } else if (data.action === "song_deleted") {
+          this.tracks = this.tracks.filter(
+            (track) => track.spotify_id !== data.song?.spotify_id
+          );
+        }
+
+        if (data.tracks) {
+          this.tracks = data.tracks;
         }
 
         if (data.queue) {
           this.queue = data.queue;
         }
-
-        console.log(this.queue, this.downloading);
       };
 
       this.websocket.onclose = () => {
@@ -164,8 +203,6 @@ export const useMusicStore = defineStore({
       );
 
       await this.downloadFromData(track_data);
-
-      console.log(track_data);
     },
   },
 });
