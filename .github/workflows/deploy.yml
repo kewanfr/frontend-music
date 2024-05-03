@@ -31,6 +31,9 @@ jobs:
           name: production-files
           path: ./dist
 
+      - name: Write CNAME file
+        run: echo 'music.kewan.fr' > ./dist/CNAME
+
   deploy:
     name: Deploy
     needs: build
