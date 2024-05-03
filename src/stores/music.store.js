@@ -5,10 +5,7 @@ import { fetchWrapper } from "@/helpers";
 
 const baseUrl = `${import.meta.env.VITE_API_URL}/music`;
 const baseUrlPlex = `${import.meta.env.VITE_API_URL}/plex`;
-const baseWebSocketUrl = import.meta.env.VITE_API_URL.replace(
-  "https://",
-  "ws://"
-).replace("http://", "ws://");
+const baseWebSocketUrl = import.meta.env.VITE_WEBSOCKET_URL;
 
 export const useMusicStore = defineStore({
   id: "music",
@@ -73,7 +70,9 @@ export const useMusicStore = defineStore({
       return false;
     },
     connectWebSocket() {
-      this.websocket = new WebSocket(baseWebSocketUrl);
+      console.log("Connecting to WebSocket..." + baseWebSocketUrl);
+      const protocols = ["https"];
+      this.websocket = new WebSocket(baseWebSocketUrl, protocols);
 
       this.websocket.onopen = () => {
         console.log("WebSocket is connected.");
