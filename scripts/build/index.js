@@ -50,3 +50,12 @@ fs.readFile("dist/index.html", "utf8", (err, data) => {
     console.log("Script added to index.html");
   });
 });
+
+fs.writeFileSync("dist/CNAME", "music.kewan.fr", "utf8", (err) => {
+  if (err) {
+    console.error(err);
+    return;
+  }
+
+  console.log("CNAME added to dist");
+});
