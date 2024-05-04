@@ -198,7 +198,7 @@ export const useMusicStore = defineStore({
       };
 
       this.music.artists = (await this.searchData(query, "artist", 2)).artists;
-      this.music.tracks = (await this.searchData(query, "track", 20)).tracks;
+      this.music.tracks = (await this.searchData(query, "track", 40)).tracks;
 
       this.music.loading = false;
     },
