@@ -10,16 +10,8 @@
 </template>
 
 <script setup>
-// import IconHome from '../icons/IconHome.vue';
-// import IconEmpty from '../icons/IconEmpty.vue';
-// import IconMusic from '../icons/IconMusic.vue';
-// import { defineAsyncComponent } from 'vue';
 import MenuElement from './MenuElement.vue';
-// import IconGallery from '../icons/IconGallery.vue';
-import { useAuthStore } from '@/stores';
 import { defineAsyncComponent, ref } from 'vue';
-import { storeToRefs } from 'pinia';
-import LoginButton from '../buttons/LoginButton.vue';
 import QueueNavButton from '../buttons/QueueNavButton.vue';
 
 import { markRaw } from 'vue';
@@ -40,41 +32,11 @@ const menuItems = ref([
     text: "Paroles",
     iconElement: IconMusic
   },
-  // {
-  //   path: "/queue",
-  //   text: "File d'attente",
-  //   custom: QueueNavButton
-  // },
   {
     path: "/library",
     text: "Bibliothèque",
     iconElement: IconArchive
   }
-  // {
-  //   path: "/queue",
-  //   text: "File d'attente",
-  //   iconElement: IconGallery
-  // }
 ]);
-
-// const store = useAuthStore();
-
-// const { isAuthenticated } = storeToRefs(store);
-// console.log(isAuthenticated);
-
-// if (isAuthenticated.value) {
-//   menuItems.value.push({
-//     path: "/logout",
-//     text: "Déconnexion",
-//     iconElement: IconEmpty
-//   });
-
-// } else {
-//   menuItems.value.push({
-//     path: "/login",
-//     text: "Connexion",
-//     iconElement: IconEmpty
-//   });
-// }
 
 </script>

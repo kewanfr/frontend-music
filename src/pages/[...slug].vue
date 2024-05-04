@@ -1,6 +1,8 @@
 <template>
-  <div class="about">
-    <h1>This is an about page</h1>
+  <!-- Erreur 404 -->
+  <div class="error">
+    <h1>Erreur 404</h1>
+    <p>La page que vous cherchez n'existe pas.</p>
   </div>
 </template>
 

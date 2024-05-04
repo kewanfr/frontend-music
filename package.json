@@ -1,7 +1,7 @@
 {
-  "name": "front-app",
-  "version": "0.0.0",
-  "private": true,
+  "name": "frontend-music",
+  "version": "1.1.1",
+  "homepage": "https://github.com/kewanfr/frontend-music",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,9 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "axios": "^1.6.8",
     "pinia": "^2.1.7",
-    "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0"

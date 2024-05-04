@@ -17,9 +17,6 @@ function request(method) {
       requestOptions.headers["Content-Type"] = "application/json";
       requestOptions.body = JSON.stringify(body);
     }
-    // if (credentials) {
-    //     requestOptions.credentials = credentials;
-    // }
     return fetch(url, requestOptions).then(handleResponse);
   };
 }
@@ -40,13 +37,6 @@ function authHeader(url) {
 
 function handleResponse(response) {
   return response.text().then((text) => {
-    // parse but don't throw on error if not json and return text
-    // var data = text;
-    // try {
-    //     data = JSON.parse(text);
-    // } catch (e) {
-    //     pass;
-    // }
     const data = (text && JSON.parse(text)) || text;
 
     if (!response.ok) {

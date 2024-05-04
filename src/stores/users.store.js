@@ -12,8 +12,6 @@ export const useUsersStore = defineStore({
   }),
   actions: {
     async getAll() {
-      // console.log(import.meta.env)
-      // console.log(process.env)
       this.users = { loading: true };
       fetchWrapper
         .get(baseUrl)

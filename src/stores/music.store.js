@@ -5,10 +5,7 @@ import { fetchWrapper } from "@/helpers";
 
 const baseUrl = `${import.meta.env.VITE_API_URL}/music`;
 const baseUrlPlex = `${import.meta.env.VITE_API_URL}/plex`;
-const baseWebSocketUrl = import.meta.env.VITE_WEBSOCKET_URL;
 import { socket } from "@/socket";
-
-// import { io } from "socket.io-client";
 
 export const useMusicStore = defineStore({
   id: "music",
@@ -261,12 +258,12 @@ export const useMusicStore = defineStore({
       });
     },
     async downloadFromSpotifyId(spotify_id) {
-      // return new Promise((resolve, reject) => {
-      //   fetchWrapper
-      //     .post(baseUrl + "/download/spotify/" + spotify_id)
-      //     .then((track) => resolve(track))
-      //     .catch((error) => reject(error));
-      // });
+      return new Promise((resolve, reject) => {
+        fetchWrapper
+          .post(baseUrl + "/download/spotify/" + spotify_id)
+          .then((track) => resolve(track))
+          .catch((error) => reject(error));
+      });
     },
     async getTrackFromYoutubeId(youtube_id) {
       return new Promise((resolve, reject) => {

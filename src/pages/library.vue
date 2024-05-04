@@ -1,6 +1,5 @@
 <template>
     <main>
-        <!-- <div class="flex flex-col items-center space-y-4 mt-5">Sons téléchargés</div> -->
         <div class="flex justify-between items-center space-y-4 mt-5">
             <div class="text-xl font-bold">Sons téléchargés</div>
             <ScanPlexButton />

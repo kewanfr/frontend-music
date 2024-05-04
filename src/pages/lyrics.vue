@@ -6,7 +6,6 @@
                     <div class="text-xl font-bold text-accent-foreground self-center">Paroles</div>
                     <ScanPlexButton />
                 </div>
-                <!-- <h2 class="text-xl font-bold text-accent-foreground self-center">Paroles</h2> -->
                 <!-- Afficher le titre, l'artiste et la pochette de l'album -->
                 <div class="flex flex-row px-4 mt-5" id="song-infos" v-if="playing.title">
                     <img :src="playing.thumb ?? 'https://via.placeholder.com/150'" alt="Pochette de l'album"
@@ -42,11 +41,9 @@
 </template>
 
 <script setup>
-import LoadingSpin from '@/components/LoadingSpin.vue';
 
 import { useMusicStore } from '@/stores';
 import { storeToRefs } from 'pinia';
-import TrackItem from '@/components/music/TrackItem.vue';
 import ScanPlexButton from '@/components/buttons/ScanPlexButton.vue';
 
 const musicStore = useMusicStore();

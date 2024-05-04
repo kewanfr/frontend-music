@@ -14,8 +14,6 @@ import ChevronRight from '../icons/ChevronRight.vue';
 import { useMusicStore } from '@/stores';
 import CoverImage from './CoverImage.vue';
 
-// import { useRouter } from 'vue-router';
-// const router = useRouter();
 
 const props = defineProps({
     artist: Object
