@@ -166,7 +166,7 @@ export const useMusicStore = defineStore({
         });
       });
     },
-    async searchData(query, type = "track", limit = 20) {
+    async searchData(query, type = "track", limit = 40) {
       return new Promise((resolve, reject) => {
         fetchWrapper
           .get(
