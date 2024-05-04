@@ -6,6 +6,13 @@
 
         <div class="w-full max-w-xl space-y-2 mt-4" id="results-list">
 
+          <div class="text-lg" v-if="downloadingData?.length > 0">Téléchargement en cours</div>
+          <TrackItem v-if="downloadingData?.length > 0" v-for="track in downloadingData" :key="track.id"
+            :track="track" />
+
+          <div class="text-lg" v-if="queue?.length > 0">File d'attente</div>
+          <div class="text-lg" v-else>File d'attente vide</div>
+
           <TrackItem v-if="queue?.length > 0" v-for="track in queue" :key="track.id" :track="track" />
         </div>
 
@@ -28,11 +35,11 @@ import TrackItem from '@/components/music/TrackItem.vue';
 
 const musicStore = useMusicStore();
 
-const { queue, isLoading } = storeToRefs(musicStore);
+const { queue, isLoading, downloadingData } = storeToRefs(musicStore);
 
 setTimeout(() => {
   if (!queue.length || queue.length == 0) {
-    musicStore.sendWebSocket("queue", "test");
+    musicStore.sendWebSocket("queue");
   }
 }, 800);
 

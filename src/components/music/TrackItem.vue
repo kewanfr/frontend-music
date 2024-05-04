@@ -4,7 +4,8 @@
 
         <div class="flex-grow">
             <h3 class="font-semibold">{{ track.name }}</h3>
-            <p class="text-gray-400">{{ track.artist }}</p>
+            <p class="text-gray-400">{{ track.artist ?? typeof track.artists === 'string' ? track.artists :
+            track.artists.join(", ") }}</p>
         </div>
         <DeleteTrackButton :spotify_id="track.spotify_id" :youtube_id="track.youtube_id" />
     </div>
@@ -18,4 +19,5 @@ const props = defineProps({
     track: Object
 });
 
+console.log(props.track);
 </script>

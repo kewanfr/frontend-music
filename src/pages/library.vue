@@ -1,6 +1,10 @@
 <template>
     <main>
-        <div class="flex flex-col items-center space-y-4 mt-5">Sons téléchargés</div>
+        <!-- <div class="flex flex-col items-center space-y-4 mt-5">Sons téléchargés</div> -->
+        <div class="flex justify-between items-center space-y-4 mt-5">
+            <div class="text-xl font-bold">Sons téléchargés</div>
+            <ScanPlexButton />
+        </div>
         <div class="divide-y divide-muted">
             <div class="flex flex-col items-center space-y-4 mt-5">
 
@@ -21,6 +25,7 @@
 
 <script setup>
 import LoadingSpin from '@/components/LoadingSpin.vue';
+import ScanPlexButton from '@/components/buttons/ScanPlexButton.vue';
 
 import { useMusicStore } from '@/stores';
 import { storeToRefs } from 'pinia';
@@ -32,7 +37,7 @@ const { tracks, isLoading } = storeToRefs(musicStore);
 
 setTimeout(() => {
     if (!tracks.length || tracks.length == 0) {
-        musicStore.sendWebSocket("tracks", "test");
+        musicStore.sendWebSocket("tracks");
     }
 }, 800);
 

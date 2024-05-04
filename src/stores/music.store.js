@@ -20,6 +20,7 @@ export const useMusicStore = defineStore({
     queue: [],
     currentSong: null,
     downloading: [],
+    downloadingData: {},
     tracks: [],
     websocket: null,
     playing: {
@@ -53,7 +54,7 @@ export const useMusicStore = defineStore({
         )
         .catch((error) => console.error(error));
     },
-    sendWebSocket(action, message) {
+    sendWebSocket(action, message = "") {
       if (this.websocket) {
         console.log(
           JSON.stringify({
@@ -99,12 +100,20 @@ export const useMusicStore = defineStore({
               !this.downloading.includes(data.song?.spotify_id)
             ) {
               this.downloading.push(data.song?.spotify_id);
+              const song_data = this.queue.find(
+                (track) => track.spotify_id === data.song?.spotify_id
+              );
+              if (song_data) this.downloadingData = song_data;
             }
             if (
               data.song?.youtube_id &&
               !this.downloading.includes(data.song?.youtube_id)
             ) {
               this.downloading.push(data.song?.youtube_id);
+              const song_data = this.queue.find(
+                (track) => track.youtube_id === data.song?.youtube_id
+              );
+              if (song_data) this.downloadingData = song_data;
             }
           } else if (data.action === "song_downloaded") {
             if (
@@ -114,6 +123,8 @@ export const useMusicStore = defineStore({
               this.downloading = this.downloading.filter(
                 (id) => id !== data.song?.spotify_id
               );
+              if (this.downloadingData.spotify_id === data.song?.spotify_id)
+                this.downloadingData = null;
               this.tracks.push(data.song);
             }
             if (
@@ -123,6 +134,8 @@ export const useMusicStore = defineStore({
               this.downloading = this.downloading.filter(
                 (id) => id !== data.song?.youtube_id
               );
+              if (this.downloadingData.youtube_id === data.song?.youtube_id)
+                this.downloadingData = null;
               this.tracks.push(data.song);
             }
           } else if (data.action === "song_deleted") {
@@ -235,6 +248,15 @@ export const useMusicStore = defineStore({
         fetchWrapper
           .post(baseUrl + "/download/data", data)
           .then((track) => resolve(track))
+          .catch((error) => reject(error));
+      });
+    },
+
+    async scanPlexLibrary() {
+      return new Promise((resolve, reject) => {
+        fetchWrapper
+          .get(baseUrlPlex + "/scan")
+          .then((result) => resolve(result))
           .catch((error) => reject(error));
       });
     },
