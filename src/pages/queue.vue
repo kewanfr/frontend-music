@@ -31,7 +31,6 @@ const musicStore = useMusicStore();
 const { queue, isLoading } = storeToRefs(musicStore);
 
 setTimeout(() => {
-  console.log(queue.length)
   if (!queue.length || queue.length == 0) {
     musicStore.sendWebSocket("queue", "test");
   }

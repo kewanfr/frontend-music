@@ -6,7 +6,7 @@
             <h3 class="font-semibold">{{ track.name }}</h3>
             <p class="text-gray-400">{{ track.artist }}</p>
         </div>
-        <DownloadTrackButton :spotify_id="track.spotify_id" v-if="!track.downloaded" />
+        <DownloadTrackButton :spotify_id="track.spotify_id" v-if="!track.downloaded" :youtube_id="track.youtube_id" />
     </div>
 </template>
 

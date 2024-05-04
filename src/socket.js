@@ -10,7 +10,11 @@ export const state = reactive({
 // "undefined" means the URL will be computed from the `window.location` object
 const URL = import.meta.env.VITE_WEBSOCKET_URL || undefined;
 
-export const socket = io(URL);
+// export const socket = io(URL);
+export const socket = io(URL, {
+    closeOnBeforeunload: true,
+    transports: ["websocket"],
+});
 
 // set name of the socket
 socket.emit("set-name", "client");

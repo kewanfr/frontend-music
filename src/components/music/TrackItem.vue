@@ -6,7 +6,7 @@
             <h3 class="font-semibold">{{ track.name }}</h3>
             <p class="text-gray-400">{{ track.artist }}</p>
         </div>
-        <DeleteTrackButton :spotify_id="track.spotify_id" />
+        <DeleteTrackButton :spotify_id="track.spotify_id" :youtube_id="track.youtube_id" />
     </div>
 </template>
 

@@ -31,7 +31,6 @@ const musicStore = useMusicStore();
 const { tracks, isLoading } = storeToRefs(musicStore);
 
 setTimeout(() => {
-    console.log(tracks.length);
     if (!tracks.length || tracks.length == 0) {
         musicStore.sendWebSocket("tracks", "test");
     }

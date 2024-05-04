@@ -61,7 +61,8 @@ export const useMusicStore = defineStore({
             message: message,
           })
         );
-        this.websocket.send(
+        this.websocket.emit(
+          "message",
           JSON.stringify({
             action: action,
             message: message,
@@ -75,67 +76,85 @@ export const useMusicStore = defineStore({
     connectWebSocket() {
       socket.on("connect", () => {
         console.log("Connected to WebSocket.");
-        socket.emit("message", "Hello from client");
 
-        socket.on("message", (data) => {
-          console.log(data);
+        this.websocket = socket;
+
+        socket.on("message", (message) => {
+          // console.log(message);
+
+          var data;
+          try {
+            data = JSON.parse(message);
+          } catch (e) {
+            data = message;
+          }
+
+          if (typeof data === "string") {
+            data = { action: "message", message: data };
+          }
+
+          if (data.action === "song_downloading") {
+            if (
+              data.song?.spotify_id &&
+              !this.downloading.includes(data.song?.spotify_id)
+            ) {
+              this.downloading.push(data.song?.spotify_id);
+            }
+            if (
+              data.song?.youtube_id &&
+              !this.downloading.includes(data.song?.youtube_id)
+            ) {
+              this.downloading.push(data.song?.youtube_id);
+            }
+          } else if (data.action === "song_downloaded") {
+            if (
+              data.song?.spotify_id &&
+              this.downloading.includes(data.song?.spotify_id)
+            ) {
+              this.downloading = this.downloading.filter(
+                (id) => id !== data.song?.spotify_id
+              );
+              this.tracks.push(data.song);
+            }
+            if (
+              data.song?.youtube_id &&
+              this.downloading.includes(data.song?.youtube_id)
+            ) {
+              this.downloading = this.downloading.filter(
+                (id) => id !== data.song?.youtube_id
+              );
+              this.tracks.push(data.song);
+            }
+          } else if (data.action === "song_deleted") {
+            if (data.song?.youtube_id) {
+              this.tracks = this.tracks.filter(
+                (track) => track.youtube_id !== data.song?.youtube_id
+              );
+            } else if (data.song?.spotify_id) {
+              this.tracks = this.tracks.filter(
+                (track) => track.spotify_id !== data.song?.spotify_id
+              );
+            }
+          } else if (data.action === "song_error") {
+            if (data.song?.spotify_id) {
+              this.downloading = this.downloading.filter(
+                (id) => id !== data.song?.spotify_id
+              );
+            }
+            if (data.song?.youtube_id) {
+              this.downloading = this.downloading.filter(
+                (id) => id !== data.song?.youtube_id
+              );
+            }
+          }
+          if (data.tracks) {
+            this.tracks = data.tracks;
+          }
+          if (data.queue) {
+            this.queue = data.queue;
+          }
         });
       });
-
-      // socket.connect();
-      // this.websocket = io("http://localhost:3001");
-      // this.websocket.on("connect", () => {
-      //   console.log("Connected to WebSocket.");
-      //   this.sendWebSocket("message", "hello");
-      //   this.websocket.emit("message", "hello");
-      // });
-      // this.websocket.emit("message", "hello");
-
-      // this.websocket.on("message", (data) => {
-      //   console.log(data);
-      // });
-
-      // console.log("Connecting to WebSocket..." + baseWebSocketUrl);
-      // const protocols = ["https"];
-      // this.websocket = new WebSocket(baseWebSocketUrl, protocols);
-      // console.log(this.websocket);
-      // this.websocket.onopen = () => {
-      //   console.log("WebSocket is connected.");
-      //   this.sendWebSocket("message", "hello");
-      // };
-      // this.websocket.onmessage = (event) => {
-      //   const data = JSON.parse(event.data);
-      //   // Handle the received data
-      //   console.log(data);
-      //   if (data.action === "song_downloading") {
-      //     if (!this.downloading.includes(data.song?.spotify_id)) {
-      //       this.downloading.push(data.song?.spotify_id);
-      //     }
-      //   } else if (data.action === "song_downloaded") {
-      //     if (this.downloading.includes(data.song?.spotify_id)) {
-      //       this.downloading = this.downloading.filter(
-      //         (id) => id !== data.song?.spotify_id
-      //       );
-      //       this.tracks.push(data.song);
-      //     }
-      //   } else if (data.action === "song_deleted") {
-      //     this.tracks = this.tracks.filter(
-      //       (track) => track.spotify_id !== data.song?.spotify_id
-      //     );
-      //   }
-      //   if (data.tracks) {
-      //     this.tracks = data.tracks;
-      //   }
-      //   if (data.queue) {
-      //     this.queue = data.queue;
-      //   }
-      // };
-      // this.websocket.onclose = () => {
-      //   console.log("WebSocket is closed.");
-      // };
-      // this.websocket.onerror = (error) => {
-      //   console.error("WebSocket encountered an error: ", error);
-      // };
     },
     async searchData(query, type = "track", limit = 20) {
       return new Promise((resolve, reject) => {
@@ -148,15 +167,30 @@ export const useMusicStore = defineStore({
       });
     },
     async search(query) {
+      if (!query) return;
       this.music = { loading: true };
+      let youtube_id = null;
+      if (query.includes("youtube.com")) {
+        youtube_id = query.split("v=")[1];
+        // return this.downloadFromYoutubeId(youtube_id);
+      } else if (query.includes("youtu.be")) {
+        youtube_id = query.split("youtu.be/")[1];
+        // return this.downloadFromYoutubeId(youtube_id);
+      }
+      if (youtube_id) {
+        return await this.getTrackFromYoutubeId(youtube_id);
+      }
 
       this.music = {
+        loading: true,
         tracks: [],
         artists: [],
       };
 
-      this.music.tracks = (await this.searchData(query, "track", 20)).tracks;
       this.music.artists = (await this.searchData(query, "artist", 2)).artists;
+      this.music.tracks = (await this.searchData(query, "track", 20)).tracks;
+
+      this.music.loading = false;
     },
     async getArtist(artist_id) {
       this.music = { loading: true };
@@ -205,7 +239,6 @@ export const useMusicStore = defineStore({
       });
     },
     async downloadFromSpotifyId(spotify_id) {
-      // this.downloading.push(spotify_id);
       // return new Promise((resolve, reject) => {
       //   fetchWrapper
       //     .post(baseUrl + "/download/spotify/" + spotify_id)
@@ -213,9 +246,35 @@ export const useMusicStore = defineStore({
       //     .catch((error) => reject(error));
       // });
     },
+    async getTrackFromYoutubeId(youtube_id) {
+      return new Promise((resolve, reject) => {
+        fetchWrapper
+          .get(baseUrl + "/track/youtube/" + youtube_id)
+          .then((track) => {
+            this.music.loading = false;
+            this.music.tracks = [track];
+            return resolve(track);
+          })
+          .catch((error) => reject(error));
+      });
+    },
+    async downloadFromYoutubeId(youtube_id) {
+      return new Promise((resolve, reject) => {
+        fetchWrapper
+          .get(baseUrl + "/download/youtube/" + youtube_id)
+          .then((track) => {
+            this.tracks.push(track);
+            this.music.loading = false;
+            this.music.tracks = [track];
+            return resolve(track);
+          })
+          .catch((error) => reject(error));
+      });
+    },
     async downloadTrack(track_id) {
       const track_data = this.music.tracks.find(
-        (track) => track.spotify_id === track_id
+        (track) =>
+          track.spotify_id === track_id || track.youtube_id === track_id
       );
 
       await this.downloadFromData(track_data);
