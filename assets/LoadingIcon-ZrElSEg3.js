@@ -1,0 +1,1 @@
+import{_ as e,o,c as r}from"./index-ZXQo0bpI.js";const c={},n={class:"animate-spin w-6 h-6 border-t-4 border-blue-500 border-solid rounded-full"};function s(t,a){return o(),r("div",n)}const _=e(c,[["render",s]]);export{_ as L};
