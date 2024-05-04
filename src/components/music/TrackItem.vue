@@ -19,5 +19,4 @@ const props = defineProps({
     track: Object
 });
 
-console.log(props.track);
 </script>
