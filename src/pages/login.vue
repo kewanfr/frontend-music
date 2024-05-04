@@ -52,8 +52,8 @@ import { useAuthStore } from '@/stores';
 const store = useAuthStore()
 const router = useRouter()
 
-const username = ref('kewanb')
-const password = ref('1234')
+const username = ref('')
+const password = ref('')
 const handleLogin = async () => {
   await store.login(username.value, password.value)
   router.push('/')
