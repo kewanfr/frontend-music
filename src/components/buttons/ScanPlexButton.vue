@@ -19,10 +19,10 @@ const { downloading, queue } = storeToRefs(musicStore);
 const loading = ref(false);
 
 const scanLibrary = () => {
-    loading = true;
+    loading.value = true;
     musicStore.scanPlexLibrary();
     setTimeout(() => {
-        loading = false;
+        loading.value = false;
     }, 5000);
 };
 </script>
