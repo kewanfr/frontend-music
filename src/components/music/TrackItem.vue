@@ -7,11 +7,13 @@
             <p class="text-gray-400">{{ track.artist ?? typeof track.artists === 'string' ? track.artists :
             track.artists.join(", ") }}</p>
         </div>
+        <EditTrackButton :spotify_id="track.spotify_id" :youtube_id="track.youtube_id" />
         <DeleteTrackButton :spotify_id="track.spotify_id" :youtube_id="track.youtube_id" />
     </div>
 </template>
 
 <script setup>
+import EditTrackButton from '../buttons/EditTrackButton.vue';
 import DeleteTrackButton from '../buttons/DeleteTrackButton.vue';
 import CoverImage from './CoverImage.vue';
 
