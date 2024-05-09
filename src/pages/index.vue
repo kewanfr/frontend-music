@@ -4,7 +4,7 @@
     <div class="divide-y divide-muted">
       <div class="flex flex-col items-center space-y-4 mt-5">
 
-        <SearchBar />
+        <SearchBar :searchAction="search" :searchButton="true" />
         <ResultsList />
 
         <LoadingSpin :isLoading="isLoading" />
@@ -28,5 +28,9 @@ import SearchBar from '../components/SearchBar.vue';
 const musicStore = useMusicStore();
 
 const { isLoading } = storeToRefs(musicStore);
+
+const search = async (query) => {
+  await musicStore.search(query);
+}
 
 </script>

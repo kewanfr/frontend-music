@@ -6,16 +6,17 @@ import { fetchWrapper } from "@/helpers";
 const baseUrl = `${import.meta.env.VITE_API_URL}/music`;
 const baseUrlPlex = `${import.meta.env.VITE_API_URL}/plex`;
 import { socket } from "@/socket";
+import { useToast } from "vue-toast-notification";
 
 export const useMusicStore = defineStore({
   id: "music",
   state: () => ({
-    music: {
+    results: {
       tracks: [],
-      artists: [],
+      artits: [],
     },
     queue: [],
-    currentSong: null,
+
     downloading: [],
     downloadingData: {},
     tracks: [],
@@ -30,7 +31,7 @@ export const useMusicStore = defineStore({
   }),
   getters: {
     isLoading() {
-      return this.music.loading || false;
+      return this.results.loading || false;
     },
   },
   actions: {
@@ -46,7 +47,7 @@ export const useMusicStore = defineStore({
         .then(
           (lyrics) =>
             (this.lyrics = lyrics.lyrics
-              .replace(/\n\n/g, "<br>")
+              ?.replace(/\n\n/g, "<br>")
               .replace(/\n/g, "<br>"))
         )
         .catch((error) => console.error(error));
@@ -68,11 +69,21 @@ export const useMusicStore = defineStore({
         );
         return true;
       }
+      const $toast = useToast();
+
+      $toast.error("Impossible de se connecter au serveur.", {
+        duration: 5000,
+      });
       console.log("Websocket not connected.");
       return false;
     },
     connectWebSocket() {
       socket.on("connect", () => {
+        const $toast = useToast();
+
+        $toast.success("Connecté au serveur.", {
+          duration: 800,
+        });
         console.log("Connected to WebSocket.");
 
         this.websocket = socket;
@@ -90,6 +101,7 @@ export const useMusicStore = defineStore({
           if (typeof data === "string") {
             data = { action: "message", message: data };
           }
+          console.log(data);
 
           if (data.action === "song_downloading") {
             if (
@@ -112,6 +124,12 @@ export const useMusicStore = defineStore({
               );
               if (song_data) this.downloadingData = song_data;
             }
+            $toast.info(
+              `Téléchargement de ${data.song?.name} - ${data.song?.artists}`,
+              {
+                duration: 5000,
+              }
+            );
           } else if (data.action === "song_downloaded") {
             if (
               data.song?.spotify_id &&
@@ -135,6 +153,13 @@ export const useMusicStore = defineStore({
                 this.downloadingData = null;
               this.tracks.push(data.song);
             }
+
+            $toast.success(
+              `${data.song?.name} - ${data.song?.artists} Téléchargé.`,
+              {
+                duration: 5000,
+              }
+            );
           } else if (data.action === "song_deleted") {
             if (data.song?.youtube_id) {
               this.tracks = this.tracks.filter(
@@ -145,6 +170,12 @@ export const useMusicStore = defineStore({
                 (track) => track.spotify_id !== data.song?.spotify_id
               );
             }
+            $toast.error(
+              `${data.song?.name} - ${data.song?.artists} Supprimé.`,
+              {
+                duration: 5000,
+              }
+            );
           } else if (data.action === "song_error") {
             if (data.song?.spotify_id) {
               this.downloading = this.downloading.filter(
@@ -156,6 +187,13 @@ export const useMusicStore = defineStore({
                 (id) => id !== data.song?.youtube_id
               );
             }
+
+            $toast.error(
+              `${data.song?.name} - ${data.song?.artists} n'a pas pu être téléchargé.`,
+              {
+                duration: 5000,
+              }
+            );
           }
           if (data.tracks) {
             this.tracks = data.tracks;
@@ -172,13 +210,13 @@ export const useMusicStore = defineStore({
           .get(
             baseUrl + "/search/" + query + "?type=" + type + "&limit=" + limit
           )
-          .then((music) => resolve(music))
+          .then((results) => resolve(results))
           .catch((error) => reject(error));
       });
     },
     async search(query) {
       if (!query) return;
-      this.music = { loading: true };
+      this.results = { loading: true };
       let youtube_id = null;
       if (query.includes("youtube.com")) {
         youtube_id = query.split("v=")[1];
@@ -191,28 +229,30 @@ export const useMusicStore = defineStore({
         return await this.getTrackFromYoutubeId(youtube_id);
       }
 
-      this.music = {
+      this.results = {
         loading: true,
         tracks: [],
         artists: [],
       };
 
-      this.music.artists = (await this.searchData(query, "artist", 2)).artists;
-      this.music.tracks = (await this.searchData(query, "track", 40)).tracks;
+      this.results.artists = (
+        await this.searchData(query, "artist", 2)
+      ).artists;
+      this.results.tracks = (await this.searchData(query, "track", 40)).tracks;
 
-      this.music.loading = false;
+      this.results.loading = false;
     },
     async getArtist(artist_id) {
-      this.music = { loading: true };
+      this.results = { loading: true };
       await fetchWrapper
         .get(baseUrl + "/artist/" + artist_id)
         .then((artistTracks) => {
-          this.music = {
+          this.results = {
             tracks: artistTracks,
             artists: [],
           };
         })
-        .catch((error) => (this.music = { error }));
+        .catch((error) => (this.results = { error }));
     },
 
     async getTrack(track_id) {
@@ -270,8 +310,8 @@ export const useMusicStore = defineStore({
         fetchWrapper
           .get(baseUrl + "/track/youtube/" + youtube_id)
           .then((track) => {
-            this.music.loading = false;
-            this.music.tracks = [track];
+            this.results.loading = false;
+            this.results.tracks = [track];
             return resolve(track);
           })
           .catch((error) => reject(error));
@@ -283,15 +323,15 @@ export const useMusicStore = defineStore({
           .get(baseUrl + "/download/youtube/" + youtube_id)
           .then((track) => {
             this.tracks.push(track);
-            this.music.loading = false;
-            this.music.tracks = [track];
+            this.results.loading = false;
+            this.results.tracks = [track];
             return resolve(track);
           })
           .catch((error) => reject(error));
       });
     },
     async downloadTrack(track_id) {
-      const track_data = this.music.tracks.find(
+      const track_data = this.results.tracks.find(
         (track) =>
           track.spotify_id === track_id || track.youtube_id === track_id
       );
