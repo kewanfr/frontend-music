@@ -196,7 +196,7 @@ export const useMusicStore = defineStore({
             );
           }
           if (data.tracks) {
-            this.tracks = data.tracks;
+            this.tracks = data.tracks.reverse();
           }
           if (data.queue) {
             this.queue = data.queue;
