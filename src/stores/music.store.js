@@ -79,6 +79,14 @@ export const useMusicStore = defineStore({
     },
     connectWebSocket() {
       socket.on("connect", () => {
+
+        if (this.websocket) {
+          this.websocket.disconnect();
+          this.websocket = null;
+
+          return;
+        }
+    
         const $toast = useToast();
 
         $toast.success("Connecté au serveur.", {
