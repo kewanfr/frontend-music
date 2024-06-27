@@ -5,7 +5,6 @@
                 <div class="flex justify-between items-center space-y-4 mt-5">
                     <div class="text-xl font-bold text-accent-foreground self-center">Paroles</div>
                     <ScanPlexButton />
-                    <RefreshButton />
 
                 </div>
                 <div class="w-full max
@@ -56,7 +55,6 @@
 import { useMusicStore } from '@/stores';
 import { storeToRefs } from 'pinia';
 import ScanPlexButton from '@/components/buttons/ScanPlexButton.vue';
-import RefreshButton from '@/components/buttons/RefreshButton.vue';
 
 const musicStore = useMusicStore();
 
