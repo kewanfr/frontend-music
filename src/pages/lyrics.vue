@@ -5,7 +5,18 @@
                 <div class="flex justify-between items-center space-y-4 mt-5">
                     <div class="text-xl font-bold text-accent-foreground self-center">Paroles</div>
                     <ScanPlexButton />
+                    <RefreshButton />
+
                 </div>
+                <div class="w-full max
+                -w-xl flex border rounded overflow-hidden mb-2">
+                    <input placeholder="Recherchez une musique..." class="p-2 flex-grow text-black" id="search-input"
+                        @keydown.enter="findLyrics" v-model="lyricsQuery" list="lyrics-list">
+                    <datalist id="lyrics-list">
+                        <option v-for="song in lyricsResults" :value="song.name + ' - ' + song.artists"></option>
+                    </datalist>
+                </div>
+
                 <!-- Afficher le titre, l'artiste et la pochette de l'album -->
                 <div class="flex flex-row px-4 mt-5" id="song-infos" v-if="playing.title">
                     <img :src="playing.thumb ?? 'https://via.placeholder.com/150'" alt="Pochette de l'album"
@@ -45,12 +56,24 @@
 import { useMusicStore } from '@/stores';
 import { storeToRefs } from 'pinia';
 import ScanPlexButton from '@/components/buttons/ScanPlexButton.vue';
+import RefreshButton from '@/components/buttons/RefreshButton.vue';
 
 const musicStore = useMusicStore();
 
-const { playing, lyrics } = storeToRefs(musicStore);
+const { playing, lyrics, lyricsQuery, lyricsResults } = storeToRefs(musicStore);
+
+const searchLyrics = async () => {
+    await musicStore.searchLyrics(lyricsQuery.value);
+}
+
+const findLyrics = async () => {
+    await musicStore.findLyrics(lyricsQuery.value);
+}
 
 musicStore.getPlaying();
 musicStore.getPlayingLyrics();
+
+// on mount, search lyrics
+searchLyrics();
 
 </script>

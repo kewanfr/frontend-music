@@ -4,6 +4,7 @@ import { defineStore } from 'pinia'
 import { fetchWrapper } from "@/helpers";
 
 const baseUrl = `${import.meta.env.VITE_API_URL}/music`;
+const baseUrlAPI = `${import.meta.env.VITE_API_URL}`;
 const baseUrlPlex = `${import.meta.env.VITE_API_URL}/plex`;
 import { socket } from "@/socket";
 import { useToast } from "vue-toast-notification";
@@ -15,6 +16,7 @@ export const useMusicStore = defineStore({
       tracks: [],
       artits: [],
     },
+    lyricsQuery: "",
     queue: [],
 
     downloading: [],
@@ -28,6 +30,7 @@ export const useMusicStore = defineStore({
       thumb: "",
     },
     lyrics: "",
+    lyricsResults: [],
   }),
   getters: {
     isLoading() {
@@ -35,6 +38,34 @@ export const useMusicStore = defineStore({
     },
   },
   actions: {
+    async findLyrics(query) {
+      return new Promise((resolve, reject) => {
+        console.log(query);
+        fetchWrapper
+          .get(baseUrlAPI + "/lyrics/find/" + query)
+          .then((lyrics) => {
+            // console.log(lyrics);
+            this.lyrics = lyrics.lyrics
+              ?.replace(/\n\n/g, "<br>")
+              .replace(/\n/g, "<br>");
+            // console.log(lyrics);
+            resolve(lyrics);
+          })
+          .catch((error) => reject(error));
+      });
+    },
+    async searchLyrics(query) {
+      return new Promise((resolve, reject) => {
+        fetchWrapper
+          .get(baseUrlAPI + "/lyrics/search/" + query)
+          .then((results) => {
+            this.lyricsResults = results;
+            // console.log(results);
+            resolve(results);
+          })
+          .catch((error) => reject(error));
+      });
+    },
     async getPlaying() {
       fetchWrapper
         .get(baseUrlPlex + "/playing")
@@ -52,6 +83,7 @@ export const useMusicStore = defineStore({
         )
         .catch((error) => console.error(error));
     },
+
     sendWebSocket(action, message = "") {
       if (this.websocket) {
         console.log(
@@ -79,14 +111,13 @@ export const useMusicStore = defineStore({
     },
     connectWebSocket() {
       socket.on("connect", () => {
-
         if (this.websocket) {
           this.websocket.disconnect();
           this.websocket = null;
 
           return;
         }
-    
+
         const $toast = useToast();
 
         $toast.success("Connecté au serveur.", {
